@@ -76,7 +76,7 @@ int main() {
 				{0, "Fassi",    "Anas",      7,  "milieu",   27,  1, 1998,  5,  "", "remplacant"},
 				{0, "Chafiq",   "Hamza",     8,  "milieu",   14, 12, 1994,  2,  "", "titulaire"},
 				{0, "Idrissi",  "Soufiane",  9,  "attaquant", 7,  5, 1997, 10,  "", "titulaire"},
-				{0, "Kharbouch","Hicham",   10,  "attaquant",25,  4, 1991,  8,  "", "titulaire"},
+				{0, "Kharbouch","Hicham",   10,  "attaquant",25,  4, 1991,  22,  "", "titulaire"},
 				{0, "Belkacem", "Amine",    11,  "attaquant",30, 10, 1990,  6,  "", "remplacant"},
 				{0, "Nasser",   "Reda",     12,  "defenseur",16,  9, 1999,  1,  "", "remplacant"},
 				{0, "Ziani",    "Karim",    13,  "milieu",   3,  3, 1993,  7,  "", "titulaire"},
