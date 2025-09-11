@@ -58,6 +58,10 @@ int validerDate(int jour, int mois, int annee);
 int numeroMaillotExiste(int numero);
 void clearScreen();
 void printError(const char* format, ...);
+int countTitulaires();
+int gardienExists(int excludeId);
+int isAllDigits(const char* s);
+int gardienTitulaireExists();
 
 int main() {
 	int choix;
@@ -124,11 +128,11 @@ int main() {
 				printf("Merci d'avoir utilise le gestionnaire d'equipe de football!\n");
 				break;
 			default:
-				printf("Choix invalide. Veuillez reessayer.\n");
+				printError("Choix invalide. Veuillez reessayer.\n");
 		}
 
 		if (choix != 7) {
-			printf("\nPress Enter to continue...");
+			printf("\ntaper Enter pour continue...");
 			getchar();
 			getchar();
 		}
@@ -155,6 +159,42 @@ void printError(const char* format, ...) {
 	vprintf(format, args);
 	setColor(COLOR_WHITE);
 	va_end(args);
+}
+int countTitulaires() {
+	int total = 0;
+	for (int i = 0; i < nombreJoueurs; i++) {
+		if (strcmp(equipe[i].statut, "titulaire") == 0) {
+			total++;
+		}
+	}
+	return total;
+}
+// excludeId: when modifying a player, ignore that player's current poste
+int gardienExists(int excludeId) {
+	for (int i = 0; i < nombreJoueurs; i++) {
+		if (excludeId != 0 && equipe[i].id == excludeId) {
+			continue;
+		}
+		if (strcmp(equipe[i].poste, "gardien") == 0) {
+			return 1;
+		}
+	}
+	return 0;
+}
+int isAllDigits(const char* s) {
+	if (s == NULL || *s == '\0') return 0;
+	for (size_t i = 0; s[i] != '\0'; i++) {
+		if (!isdigit((unsigned char)s[i])) return 0;
+	}
+	return 1;
+}
+int gardienTitulaireExists() {
+	for (int i = 0; i < nombreJoueurs; i++) {
+		if (strcmp(equipe[i].poste, "gardien") == 0 && strcmp(equipe[i].statut, "titulaire") == 0) {
+			return 1;
+		}
+	}
+	return 0;
 }
 void afficherTitre() {
 	setColor(COLOR_CYAN);
@@ -326,13 +366,22 @@ void ajouterJoueur() {
 	} while (!validerDate(nouveauJoueur.jourNaissance, nouveauJoueur.moisNaissance, nouveauJoueur.anneeNaissance));
 
 // Saisie du nombre de buts
+	nouveauJoueur.buts = -1;
 	do {
+		char butsInput[32];
 		printf("Nombre de buts marques: ");
-		while (scanf("%d", &nouveauJoueur.buts) != 1) {
-			printError("Erreur: Entrez uniquement des chiffres.\n");
+		if (scanf("%31s", butsInput) != 1) {
 			while (getchar() != '\n');
-			printf("Nombre de buts marques: ");
+			printError("Erreur: Entrez uniquement des chiffres.\n");
+			nouveauJoueur.buts = -1;
+			continue;
 		}
+		if (!isAllDigits(butsInput)) {
+			printError("Erreur: Entrez uniquement des chiffres.\n");
+			nouveauJoueur.buts = -1;
+			continue;
+		}
+		nouveauJoueur.buts = atoi(butsInput);
 		if (nouveauJoueur.buts < 0) {
 			printError("Erreur: Le nombre de buts ne peut pas etre negatif.\n");
 		}
@@ -365,6 +414,32 @@ void ajouterJoueur() {
 	sprintf(nouveauJoueur.dateInscription, "%02d/%02d/%04d",
 	        tm_info->tm_mday, tm_info->tm_mon + 1, tm_info->tm_year + 1900);
 
+	// Contraintes: max 11 titulaires et exactement 1 gardien au maximum
+	if (strcmp(nouveauJoueur.statut, "titulaire") == 0 && countTitulaires() >= 11) {
+		setColor(COLOR_YELLOW);
+		printf("Deja 11 titulaires. Vous serez ajoute comme remplacant.\n");
+		setColor(COLOR_WHITE);
+		strcpy(nouveauJoueur.statut, "remplacant");
+	}
+	if (strcmp(nouveauJoueur.poste, "gardien") == 0) {
+		if (gardienTitulaireExists() && strcmp(nouveauJoueur.statut, "titulaire") == 0) {
+			setColor(COLOR_YELLOW);
+			printf("Un gardien titulaire existe deja. Vous serez ajoute comme remplacant.\n");
+			setColor(COLOR_WHITE);
+			strcpy(nouveauJoueur.statut, "remplacant");
+		} else if (gardienExists(0) && strcmp(nouveauJoueur.statut, "remplacant") == 0) {
+			// ok: allow additional gardiens as remplacants
+		} else if (gardienExists(0) && strcmp(nouveauJoueur.statut, "titulaire") != 0) {
+			// covered by first branch; keep for clarity
+		} else if (gardienExists(0) && strcmp(nouveauJoueur.statut, "titulaire") == 0) {
+			// fallback safety, though first branch should catch titulaire conflict
+			setColor(COLOR_YELLOW);
+			printf("Un gardien existe deja. Vous serez ajoute comme remplacant.\n");
+			setColor(COLOR_WHITE);
+			strcpy(nouveauJoueur.statut, "remplacant");
+		}
+	}
+
 // Ajouter le joueur a l'equipe
 	equipe[nombreJoueurs] = nouveauJoueur;
 	nombreJoueurs++;
@@ -375,6 +450,9 @@ void ajouterJoueur() {
 	printf("ID: %d\nNom: %s %s\nAge: %d ans\n",
 	       nouveauJoueur.id, nouveauJoueur.nom, nouveauJoueur.prenom,
 	       calculerAge(nouveauJoueur.jourNaissance, nouveauJoueur.moisNaissance, nouveauJoueur.anneeNaissance));
+	printf("Date de naissance: %02d/%02d/%04d\n",
+	       nouveauJoueur.jourNaissance, nouveauJoueur.moisNaissance, nouveauJoueur.anneeNaissance);
+	printf("Buts: %d\n", nouveauJoueur.buts);
 
 // Verifier si c'est une star (10+ buts)
 	if (nouveauJoueur.buts >= 10) {
@@ -430,7 +508,7 @@ void ajouterDesJoueurs() {
 			printf("return");
 			break;
 		default:
-			printf("Choix invalide.\n");
+			printError("Choix invalide.\n");
 	}
 }
 
@@ -460,7 +538,7 @@ void afficherJoueurs() {
 
 	switch(choix) {
 		case 1: {
-// Afficher tous les joueurs triés par ID
+			// Afficher tous les joueurs tries par ID
 			setColor(COLOR_CYAN);
 			printf("\n=== TOUS LES JOUEURS (TRIES PAR ID) ===\n");
 			setColor(COLOR_YELLOW);
@@ -469,13 +547,13 @@ void afficherJoueurs() {
 			printf("----|----------------|----------------|---------|------------|------|-------|-------------|----------\n");
 			setColor(COLOR_WHITE);
 
-// Créer un tableau d'indices tries par ID
+			// Creer un tableau d'indices tries par ID
 			int indices[nombreJoueurs];
 			for (int i = 0; i < nombreJoueurs; i++) {
 				indices[i] = i;
 			}
 
-// Tri par selection base sur l'ID
+			// Tri par selection base sur l'ID
 			for (int i = 0; i < nombreJoueurs - 1; i++) {
 				int minIndex = i;
 				for (int j = i + 1; j < nombreJoueurs; j++) {
@@ -490,7 +568,7 @@ void afficherJoueurs() {
 				}
 			}
 
-// Afficher les joueurs tries par ID
+			// Afficher les joueurs tries par ID
 			for (int i = 0; i < nombreJoueurs; i++) {
 				int index = indices[i];
 				printf("%3d | %-14s | %-14s | %7d | %-10s | %3d | %4d | %-10s | %s\n",
@@ -510,7 +588,7 @@ void afficherJoueurs() {
 			afficherParPoste();
 			break;
 		default:
-			printf("Choix invalide.\n");
+			printError("Choix invalide.\n");
 	}
 }
 
@@ -531,10 +609,14 @@ void trierParNom() {
 			equipe[minIndex] = temp;
 		}
 	}
-
+	setColor(COLOR_CYAN);
 	printf("\n=== JOUEURS TRIES PAR NOM ===\n");
+	printf("\n");
+	setColor(COLOR_YELLOW);
 	printf("ID  | Nom            | Prenom         | Maillot | Poste      | Age | Buts\n");
+	setColor(COLOR_GRAY);
 	printf("----|----------------|----------------|---------|------------|-----|------\n");
+	setColor(COLOR_WHITE);
 	for (int i = 0; i < nombreJoueurs; i++) {
 		printf("%3d | %-14s | %-14s | %7d | %-10s | %3d | %4d\n",
 		       equipe[i].id, equipe[i].nom, equipe[i].prenom, equipe[i].numeroMaillot,
@@ -563,9 +645,15 @@ void trierParAge() {
 		}
 	}
 
+	setColor(COLOR_CYAN);
 	printf("\n=== JOUEURS TRIES PAR AGE ===\n");
+	printf("\n");
+	setColor(COLOR_WHITE);
+	setColor(COLOR_YELLOW);
 	printf("ID  | Nom            | Prenom         | Maillot | Poste      | Age | Buts\n");
+	setColor(COLOR_GRAY);
 	printf("----|----------------|----------------|---------|------------|-----|------\n");
+	setColor(COLOR_WHITE);
 	for (int i = 0; i < nombreJoueurs; i++) {
 		printf("%3d | %-14s | %-14s | %7d | %-10s | %3d | %4d\n",
 		       equipe[i].id, equipe[i].nom, equipe[i].prenom, equipe[i].numeroMaillot,
@@ -578,11 +666,35 @@ void afficherParPoste() {
 	clearScreen();
 	afficherTitre();
 	char posteRecherche[20];
-	printf("Poste a afficher (gardien/defenseur/milieu/attaquant): ");
-	scanf("%s", posteRecherche);
+	int choixPoste = 0;
+	printf("Choisissez le poste a afficher:\n");
+	setColor(COLOR_GREEN); printf("  1. "); setColor(COLOR_WHITE); printf("gardien\n");
+	setColor(COLOR_GREEN); printf("  2. "); setColor(COLOR_WHITE); printf("defenseur\n");
+	setColor(COLOR_GREEN); printf("  3. "); setColor(COLOR_WHITE); printf("milieu\n");
+	setColor(COLOR_GREEN); printf("  4. "); setColor(COLOR_WHITE); printf("attaquant\n");
+	printf("Votre choix (1-4): ");
+	while (1) {
+		while (scanf("%d", &choixPoste) != 1) {
+			printError("Erreur: Entrez uniquement des chiffres (1-4).\n");
+			while (getchar() != '\n');
+			printf("Votre choix (1-4): ");
+		}
+		switch (choixPoste) {
+			case 1: strcpy(posteRecherche, "gardien"); break;
+			case 2: strcpy(posteRecherche, "defenseur"); break;
+			case 3: strcpy(posteRecherche, "milieu"); break;
+			case 4: strcpy(posteRecherche, "attaquant"); break;
+			default:
+				printError("Erreur: Choix invalide. Choisissez entre 1 et 4.\n");
+				printf("Votre choix (1-4): ");
+				continue;
+		}
+		break;
+	}
 
 	setColor(COLOR_CYAN);
 	printf("\n=== JOUEURS AU POSTE: %s ===\n", posteRecherche);
+	printf("\n");
 	setColor(COLOR_YELLOW);
 	printf("ID  | Nom            | Prenom         | Maillot | Age | Buts | Statut\n");
 	setColor(COLOR_GRAY);
@@ -601,7 +713,7 @@ void afficherParPoste() {
 	}
 
 	if (!trouve) {
-		printf("Aucun joueur trouve au poste %s.\n", posteRecherche);
+		printError("Aucun joueur trouve au poste %s.\n", posteRecherche);
 	}
 }
 // Modification de joueur par Id
@@ -626,7 +738,7 @@ void modifierJoueur() {
 	}
 
 	if (index == -1) {
-		printf("Joueur avec l'ID %d non trouve.\n", id);
+		printError("Joueur avec l'ID %d non trouve.\n", id);
 		return;
 	}
 
@@ -641,6 +753,8 @@ void modifierJoueur() {
 	printf("3. "); setColor(COLOR_WHITE); printf("Modifier le nombre de buts\n");
 	setColor(COLOR_GREEN);
 	printf("4. "); setColor(COLOR_WHITE); printf("annule la modification\n");
+	setColor(COLOR_GREEN);
+	printf("5. "); setColor(COLOR_WHITE); printf("Modifier le statut (titulaire/remplacant)\n");
 	setColor(COLOR_CYAN);
 	printf("Votre choix: ");
 	setColor(COLOR_WHITE);
@@ -656,12 +770,15 @@ void modifierJoueur() {
 				        strcmp(equipe[index].poste, "milieu") != 0 &&
 				        strcmp(equipe[index].poste, "attaquant") != 0) {
 					printError("Erreur: Poste invalide.\n");
+				} else if (strcmp(equipe[index].poste, "gardien") == 0 && gardienExists(equipe[index].id)) {
+					printError("Erreur: L'equipe ne peut avoir qu'un seul gardien.\n");
+					strcpy(equipe[index].poste, "");
 				}
 			} while (strcmp(equipe[index].poste, "gardien") != 0 &&
-			         strcmp(equipe[index].poste, "defenseur") != 0 &&
-			         strcmp(equipe[index].poste, "milieu") != 0 &&
-			         strcmp(equipe[index].poste, "attaquant") != 0);
-			printf("Poste modifié avec succes!\n");
+		         strcmp(equipe[index].poste, "defenseur") != 0 &&
+		         strcmp(equipe[index].poste, "milieu") != 0 &&
+		         strcmp(equipe[index].poste, "attaquant") != 0);
+			printf("Poste modifie avec succes!\n");
 			break;
 
 		case 2:
@@ -677,7 +794,7 @@ void modifierJoueur() {
 					if (age < 17) {
 						printError("Erreur: L'age doit etre d'au moins 17 ans: \n");
 					} else if (age > 40) {
-						printError("Erreur: L'age doit etre d'au maximum 40 ans: \n");
+						printError("Erreur: L'age doit etre d'au maximum 45 ans: \n");
 					} else {
 						printError("Erreur: Date invalide.\n");
 					}
@@ -688,19 +805,28 @@ void modifierJoueur() {
 			break;
 
 		case 3:
+			equipe[index].buts = -1;
 			do {
+				char butsInput[32];
 				printf("Nouveau nombre de buts: ");
-				while (scanf("%d", &equipe[index].buts) != 1) {
-					printError("Erreur: Entrez uniquement des chiffres.\n");
+				if (scanf("%31s", butsInput) != 1) {
 					while (getchar() != '\n');
-					printf("Nouveau nombre de buts: ");
+					printError("Erreur: Entrez uniquement des chiffres.\n");
+					equipe[index].buts = -1;
+					continue;
 				}
+				if (!isAllDigits(butsInput)) {
+					printError("Erreur: Entrez uniquement des chiffres.\n");
+					equipe[index].buts = -1;
+					continue;
+				}
+				equipe[index].buts = atoi(butsInput);
 				if (equipe[index].buts < 0) {
 					printError("Erreur: Le nombre de buts ne peut pas etre negatif.\n");
 				}
 			} while (equipe[index].buts < 0);
 			printf("Nombre de buts modifie avec succes!\n");
-// Verifier si c'est maintenant une star
+			// Verifier si c'est maintenant une star
 			if (equipe[index].buts >= 10) {
 				printf("Felicitations! %s %s est maintenant une STAR de l'equipe!\n",
 				       equipe[index].prenom, equipe[index].nom);
@@ -709,6 +835,26 @@ void modifierJoueur() {
 		case 4:
 			printf("Exiting modification.\n");
 			break;
+		case 5: {
+			char newStatut[20];
+			do {
+				printf("Nouveau statut (titulaire/remplacant): ");
+				scanf("%19s", newStatut);
+				if (strcmp(newStatut, "titulaire") != 0 && strcmp(newStatut, "remplacant") != 0) {
+					printError("Erreur: Statut invalide.\n");
+					continue;
+				}
+				if (strcmp(newStatut, "titulaire") == 0 && strcmp(equipe[index].statut, "titulaire") != 0 && countTitulaires() >= 11) {
+					printError("Erreur: Vous ne pouvez pas avoir plus de 11 titulaires.\n");
+					strcpy(newStatut, "");
+				}
+			} while (strcmp(newStatut, "titulaire") != 0 && strcmp(newStatut, "remplacant") != 0);
+			if (strlen(newStatut) > 0) {
+				strcpy(equipe[index].statut, newStatut);
+				printf("Statut modifie avec succes!\n");
+			}
+			break;
+		}
 		default:
 			printError("Choix invalide.\n");
 	}
@@ -735,7 +881,7 @@ void supprimerJoueur() {
 	}
 
 	if (index == -1) {
-		printf("Joueur avec l'ID %d non trouve.\n", id);
+		printError("Joueur avec l'ID %d non trouve.\n", id);
 		return;
 	}
 
@@ -785,10 +931,12 @@ void rechercherJoueur() {
 			for (int i = 0; i < nombreJoueurs; i++) {
 				if (equipe[i].id == id) {
 					printf("\n=== JOUEUR TROUVE ===\n");
-					printf("ID: %d | %s %s | Maillot: %d | Poste: %s | Age: %d ans | Buts: %d | Statut: %s | Inscrit le: %s\n",
+					printf("ID: %d | %s %s | Maillot: %d | Poste: %s | Age: %d ans | Buts: %d | Statut: %s | Naissance: %02d/%02d/%04d | Inscrit le: %s\n",
 					       equipe[i].id, equipe[i].nom, equipe[i].prenom, equipe[i].numeroMaillot,
 					       equipe[i].poste, calculerAge(equipe[i].jourNaissance, equipe[i].moisNaissance, equipe[i].anneeNaissance),
-					       equipe[i].buts, equipe[i].statut, equipe[i].dateInscription);
+					       equipe[i].buts, equipe[i].statut,
+					       equipe[i].jourNaissance, equipe[i].moisNaissance, equipe[i].anneeNaissance,
+					       equipe[i].dateInscription);
 					trouve = 1;
 					break;
 				}
@@ -808,10 +956,11 @@ void rechercherJoueur() {
 			for (int i = 0; i < nombreJoueurs; i++) {
 				if (strcmp(equipe[i].nom, nomRecherche) == 0) {
 					printf("\n=== JOUEUR TROUVE ===\n");
-					printf("ID: %d | %s %s | Maillot: %d | Poste: %s | Age: %d ans | Buts: %d | Statut: %s\n",
+					printf("ID: %d | %s %s | Maillot: %d | Poste: %s | Age: %d ans | Buts: %d | Statut: %s | Naissance: %02d/%02d/%04d\n",
 					       equipe[i].id, equipe[i].nom, equipe[i].prenom, equipe[i].numeroMaillot,
 					       equipe[i].poste, calculerAge(equipe[i].jourNaissance, equipe[i].moisNaissance, equipe[i].anneeNaissance),
-					       equipe[i].buts, equipe[i].statut);
+					       equipe[i].buts, equipe[i].statut,
+					       equipe[i].jourNaissance, equipe[i].moisNaissance, equipe[i].anneeNaissance);
 					trouve = 1;
 				}
 			}
@@ -822,7 +971,7 @@ void rechercherJoueur() {
 		}
 
 		default:
-			printf("Choix invalide.\n");
+			printError("Choix invalide.\n");
 	}
 }
 // Les statistiques
@@ -994,7 +1143,7 @@ int validerDate(int jour, int mois, int annee) {
 	}
 	if (jour > joursParMois[mois - 1]) return 0;
 	
-// Vérifier que l'age est entre 17 et 40 ans
+	// Verifier que l'age est entre 17 et 40 ans
 	int age = calculerAge(jour, mois, annee);
 	if (age < 17 || age > 40) return 0;
 
