@@ -132,7 +132,7 @@ int main() {
 		}
 
 		if (choix != 7) {
-			printf("\ntaper Enter pour continue...");
+			printf("\ntaper Entrer pour continue...");
 			getchar();
 			getchar();
 		}
@@ -233,7 +233,7 @@ void afficherMenu() {
 
 void ajouterJoueur() {
 	if (nombreJoueurs >= 30) {
-		printError("Erreur: L'equipe est pleine (30 joueurs maximum).\n");
+		printError("Erreur: L'equipe est pleine!!.\n");
 		return;
 	}
 
@@ -304,18 +304,18 @@ void ajouterJoueur() {
 
 // Saisie du numero de maillot
 	do {
-		printf("Numero de maillot: ");
+		printf("Numero de maillot (1-99): ");
 		while (scanf("%d", &nouveauJoueur.numeroMaillot) != 1) {
 			printError("Erreur: Entrez uniquement des chiffres.\n");
 			while (getchar() != '\n');
-			printf("Numero de maillot: ");
+			printf("Numero de maillot (1-99): ");
 		}
-		if (nouveauJoueur.numeroMaillot <= 0) {
-			printError("Erreur: Le numero de maillot doit etre positif.\n");
+		if (nouveauJoueur.numeroMaillot < 1 || nouveauJoueur.numeroMaillot > 99) {
+			printError("Erreur: Le numero de maillot doit etre entre 1 et 99.\n");
 		} else if (numeroMaillotExiste(nouveauJoueur.numeroMaillot)) {
 			printError("Erreur: Ce numero de maillot existe deja.\n");
 		}
-	} while (nouveauJoueur.numeroMaillot <= 0 || numeroMaillotExiste(nouveauJoueur.numeroMaillot));
+	} while (nouveauJoueur.numeroMaillot < 1 || nouveauJoueur.numeroMaillot > 99 || numeroMaillotExiste(nouveauJoueur.numeroMaillot));
 
 // Saisie du poste
 	do {
@@ -1113,20 +1113,8 @@ int calculerAge(int jour, int mois, int annee) {
 
 	int age = tm_info->tm_year + 1900 - annee;
 
-// Ajuster si l'anniversaire n'est pas encore passe cette annee
-//	if (tm_info->tm_mon + 1 < mois ||
-//	        (tm_info->tm_mon + 1 == mois && tm_info->tm_mday < jour)) {
-//		age--;
-//	}
-
 	return age;
 }
-
-// Fonction pour verifier si une annee est bissextile
-int estAnneeBissextile(int annee) {
-	return (annee % 4 == 0 && annee % 100 != 0) || (annee % 400 == 0);
-}
-
 // Fonction pour valider une date
 int validerDate(int jour, int mois, int annee) {
 	if (annee < 1900 || annee > 2024)
@@ -1135,15 +1123,7 @@ int validerDate(int jour, int mois, int annee) {
 	return 0;
 	if (jour < 1) 
 	return 0;
-
-	int joursParMois[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-// Fevrier en annee bissextile
-	if (estAnneeBissextile(annee)) {
-		joursParMois[1] = 29;
-	}
-	if (jour > joursParMois[mois - 1]) return 0;
-	
-	// Verifier que l'age est entre 17 et 40 ans
+// Verifier que l'age est entre 17 et 40 ans
 	int age = calculerAge(jour, mois, annee);
 	if (age < 17 || age > 40) return 0;
 
