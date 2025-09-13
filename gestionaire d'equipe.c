@@ -2,9 +2,8 @@
 #include <string.h>
 #include <time.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <windows.h>
-#include <stdarg.h>
+
 
 // Codes de couleurs pour Windows
 #define COLOR_RESET   7
@@ -60,7 +59,7 @@ void printError(const char* format, ...);
 int countTitulaires();
 int gardienExists(int excludeId);
 int isAllDigits(const char* s);
-int gardienTitulaireExists();
+int gardienTitulaireExists(); 
 int validerNom(char* nom, const char* type);
 void saisirNom(char* nom, const char* type);
 int saisirChoixNumerique(int min, int max, const char* message);
@@ -160,18 +159,15 @@ int main() {
 // FONCTIONS UTILITAIRES DE BASE
 // ============================================================================
 
-// Fonction pour changer la couleur du texte dans la console
-// Utilise l'API Windows pour modifier les couleurs d'affichage
 void setColor(int color) {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, color);
 }
 
-// Fonction pour effacer l'ecran de la console
-// Utilise la commande system "cls" pour nettoyer l'affichage
 void clearScreen() {
 	system("cls");
 }
+// pour printer tout les error en rouge
 void printError(const char* format, ...) {
 	va_list args;
 	va_start(args, format);
@@ -189,7 +185,7 @@ int countTitulaires() {
 	}
 	return total;
 }
-// excludeId: lors de la modification d'un joueur, ignorer le poste actuel de ce joueur
+//lors de la modification d'un joueur ignorer le poste actuel de ce joueur
 int gardienExists(int excludeId) {
 	for (int i = 0; i < nombreJoueurs; i++) {
 		if (excludeId != 0 && equipe[i].id == excludeId) {
@@ -201,6 +197,7 @@ int gardienExists(int excludeId) {
 	}
 	return 0;
 }
+//pour saisie nombre seulement
 int isAllDigits(const char* s) {
 	if (s == NULL || *s == '\0') return 0;
 	for (size_t i = 0; s[i] != '\0'; i++) {
@@ -231,17 +228,29 @@ void afficherMenu() {
 	setColor(COLOR_YELLOW);
 	printf("\n=== GESTIONNAIRE D'EQUIPE DE FOOTBALL ===\n");
 	setColor(COLOR_GREEN);
-	printf("1. "); setColor(COLOR_WHITE); printf("Ajouter des joueurs\n");
+	printf("1. ");
+	setColor(COLOR_WHITE);
+	printf("Ajouter des joueurs\n");
 	setColor(COLOR_GREEN);
-	printf("2. "); setColor(COLOR_WHITE); printf("Afficher les joueurs\n");
+	printf("2. ");
+	setColor(COLOR_WHITE);
+	printf("Afficher les joueurs\n");
 	setColor(COLOR_GREEN);
-	printf("3. "); setColor(COLOR_WHITE); printf("Modifier un joueur\n");
+	printf("3. ");
+	setColor(COLOR_WHITE);
+	printf("Modifier un joueur\n");
 	setColor(COLOR_GREEN);
-	printf("4. "); setColor(COLOR_WHITE); printf("Supprimer un joueur\n");
+	printf("4. ");
+	setColor(COLOR_WHITE);
+	printf("Supprimer un joueur\n");
 	setColor(COLOR_GREEN);
-	printf("5. "); setColor(COLOR_WHITE); printf("Rechercher un joueur\n");
+	printf("5. ");
+	setColor(COLOR_WHITE);
+	printf("Rechercher un joueur\n");
 	setColor(COLOR_GREEN);
-	printf("6. "); setColor(COLOR_WHITE); printf("Statistiques\n");
+	printf("6. ");
+	setColor(COLOR_WHITE);
+	printf("Statistiques\n");
 	setColor(COLOR_RED);
 	printf("7. Quitter\n");
 	setColor(COLOR_BLUE);
@@ -377,7 +386,7 @@ void ajouterJoueur() {
 void ajouterPlusieursJoueurs() {
 	afficherTitre();
 	int nombre = saisirEntierPositif("\nCombien de joueurs voulez vous ajouter : ");
-	
+
 	for (int i = 0; i < nombre; i++) {
 		printf("\n--- Joueur %d/%d ---\n", i + 1, nombre);
 		ajouterJoueur();
@@ -393,11 +402,17 @@ void ajouterDesJoueurs() {
 	setColor(COLOR_CYAN);
 	printf("\n=== AJOUTER DES JOUEURS ===\n");
 	setColor(COLOR_GREEN);
-	printf("1. "); setColor(COLOR_WHITE); printf("Ajouter un joueur\n");
+	printf("1. ");
+	setColor(COLOR_WHITE);
+	printf("Ajouter un joueur\n");
 	setColor(COLOR_GREEN);
-	printf("2. "); setColor(COLOR_WHITE); printf("Ajouter plusieurs joueurs\n");
+	printf("2. ");
+	setColor(COLOR_WHITE);
+	printf("Ajouter plusieurs joueurs\n");
 	setColor(COLOR_GREEN);
-	printf("3. "); setColor(COLOR_WHITE); printf("annule l ajout\n");
+	printf("3. ");
+	setColor(COLOR_WHITE);
+	printf("annule l ajout\n");
 	setColor(COLOR_CYAN);
 	printf("Votre choix: ");
 	setColor(COLOR_WHITE);
@@ -430,13 +445,21 @@ void afficherJoueurs() {
 	setColor(COLOR_CYAN);
 	printf("\n=== AFFICHAGE DES JOUEURS ===\n");
 	setColor(COLOR_GREEN);
-	printf("1. "); setColor(COLOR_WHITE); printf("Tous les joueurs\n");
+	printf("1. ");
+	setColor(COLOR_WHITE);
+	printf("Tous les joueurs\n");
 	setColor(COLOR_GREEN);
-	printf("2. "); setColor(COLOR_WHITE); printf("Trier par nom\n");
+	printf("2. ");
+	setColor(COLOR_WHITE);
+	printf("Trier par nom\n");
 	setColor(COLOR_GREEN);
-	printf("3. "); setColor(COLOR_WHITE); printf("Trier par age\n");
+	printf("3. ");
+	setColor(COLOR_WHITE);
+	printf("Trier par age\n");
 	setColor(COLOR_GREEN);
-	printf("4. "); setColor(COLOR_WHITE); printf("Afficher par poste\n");
+	printf("4. ");
+	setColor(COLOR_WHITE);
+	printf("Afficher par poste\n");
 	setColor(COLOR_CYAN);
 	printf("Votre choix: ");
 	setColor(COLOR_WHITE);
@@ -500,15 +523,25 @@ void modifierJoueur() {
 	setColor(COLOR_CYAN);
 	printf("\n=== MODIFICATION DU JOUEUR %s %s ===\n", equipe[index].nom, equipe[index].prenom);
 	setColor(COLOR_GREEN);
-	printf("1. "); setColor(COLOR_WHITE); printf("Modifier le poste\n");
+	printf("1. ");
+	setColor(COLOR_WHITE);
+	printf("Modifier le poste\n");
 	setColor(COLOR_GREEN);
-	printf("2. "); setColor(COLOR_WHITE); printf("Modifier l'age (date de naissance)\n");
+	printf("2. ");
+	setColor(COLOR_WHITE);
+	printf("Modifier l'age (date de naissance)\n");
 	setColor(COLOR_GREEN);
-	printf("3. "); setColor(COLOR_WHITE); printf("Modifier le nombre de buts\n");
-	printf("4. "); setColor(COLOR_WHITE); printf("Modifier le statut (titulaire/remplacant)\n");
+	printf("3. ");
+	setColor(COLOR_WHITE);
+	printf("Modifier le nombre de buts\n");
+	printf("4. ");
+	setColor(COLOR_WHITE);
+	printf("Modifier le statut (titulaire/remplacant)\n");
 	setColor(COLOR_CYAN);
 	setColor(COLOR_GREEN);
-	printf("5. "); setColor(COLOR_WHITE); printf("annule la modification\n");
+	printf("5. ");
+	setColor(COLOR_WHITE);
+	printf("annule la modification\n");
 	setColor(COLOR_GREEN);
 	printf("Votre choix: ");
 	setColor(COLOR_WHITE);
@@ -642,9 +675,13 @@ void rechercherJoueur() {
 	setColor(COLOR_CYAN);
 	printf("\n=== RECHERCHE DE JOUEUR ===\n");
 	setColor(COLOR_GREEN);
-	printf("1. "); setColor(COLOR_WHITE); printf("Rechercher par ID\n");
+	printf("1. ");
+	setColor(COLOR_WHITE);
+	printf("Rechercher par ID\n");
 	setColor(COLOR_GREEN);
-	printf("2. "); setColor(COLOR_WHITE); printf("Rechercher par nom\n");
+	printf("2. ");
+	setColor(COLOR_WHITE);
+	printf("Rechercher par nom\n");
 	setColor(COLOR_CYAN);
 	printf("Votre choix: ");
 	setColor(COLOR_WHITE);
@@ -705,35 +742,35 @@ void rechercherJoueur() {
 }
 // Les statistiques
 void afficherStatistiques() {
- 	clearScreen();
- 	afficherTitre();
- 	if (nombreJoueurs == 0) {
- 		printf("\nAucun joueur dans l'equipe.\n");
- 		return;
- 	}
+	clearScreen();
+	afficherTitre();
+	if (nombreJoueurs == 0) {
+		printf("\nAucun joueur dans l'equipe.\n");
+		return;
+	}
 
 	setColor(COLOR_CYAN);
 	printf("\n=== STATISTIQUES DE L'EQUIPE ===\n");
 	setColor(COLOR_WHITE);
 
- // Nombre total de joueurs
+// Nombre total de joueurs
 	setColor(COLOR_YELLOW);
 	printf("Nombre total de joueurs: ");
 	setColor(COLOR_WHITE);
 	printf("%d\n", nombreJoueurs);
 
- // Age moyen
- 	int sommeAges = 0;
- 	for (int i = 0; i < nombreJoueurs; i++) {
- 		sommeAges += calculerAge(equipe[i].jourNaissance, equipe[i].moisNaissance, equipe[i].anneeNaissance);
- 	}
- 	double ageMoyen = (double)sommeAges / nombreJoueurs;
+// Age moyen
+	int sommeAges = 0;
+	for (int i = 0; i < nombreJoueurs; i++) {
+		sommeAges += calculerAge(equipe[i].jourNaissance, equipe[i].moisNaissance, equipe[i].anneeNaissance);
+	}
+	double ageMoyen = (double)sommeAges / nombreJoueurs;
 	setColor(COLOR_YELLOW);
 	printf("Age moyen des joueurs: ");
 	setColor(COLOR_WHITE);
 	printf("%.1f ans\n", ageMoyen);
 
- // Joueurs ayant marque plus de X buts
+// Joueurs ayant marque plus de X buts
 	int seuilButs = saisirEntierPositif("Afficher les joueurs ayant marque plus de combien de buts : ");
 
 	setColor(COLOR_CYAN);
@@ -743,19 +780,19 @@ void afficherStatistiques() {
 	setColor(COLOR_CYAN);
 	printf("buts:\n");
 	setColor(COLOR_WHITE);
- 	int trouve = 0;
- 	for (int i = 0; i < nombreJoueurs; i++) {
- 		if (equipe[i].buts > seuilButs) {
+	int trouve = 0;
+	for (int i = 0; i < nombreJoueurs; i++) {
+		if (equipe[i].buts > seuilButs) {
 			setColor(COLOR_WHITE);
 			printf("- %s %s: ", equipe[i].nom, equipe[i].prenom);
 			setColor(COLOR_GREEN);
 			printf("%d ", equipe[i].buts);
 			setColor(COLOR_WHITE);
 			printf("buts\n");
- 			trouve = 1;
- 		}
- 	}
- 	if (!trouve) {
+			trouve = 1;
+		}
+	}
+	if (!trouve) {
 		setColor(COLOR_GRAY);
 		printf("Aucun joueur n'a marque plus de ");
 		setColor(COLOR_WHITE);
@@ -763,19 +800,19 @@ void afficherStatistiques() {
 		setColor(COLOR_GRAY);
 		printf("buts.\n");
 		setColor(COLOR_WHITE);
- 	}
+	}
 
- // Meilleur buteur
- 	int maxButs = -1;
- 	int indexMeilleurButeur = -1;
- 	for (int i = 0; i < nombreJoueurs; i++) {
- 		if (equipe[i].buts > maxButs) {
- 			maxButs = equipe[i].buts;
- 			indexMeilleurButeur = i;
- 		}
- 	}
+// Meilleur buteur
+	int maxButs = -1;
+	int indexMeilleurButeur = -1;
+	for (int i = 0; i < nombreJoueurs; i++) {
+		if (equipe[i].buts > maxButs) {
+			maxButs = equipe[i].buts;
+			indexMeilleurButeur = i;
+		}
+	}
 
- 	if (indexMeilleurButeur != -1) {
+	if (indexMeilleurButeur != -1) {
 		setColor(COLOR_MAGENTA);
 		printf("\nMeilleur buteur: ");
 		setColor(COLOR_WHITE);
@@ -784,26 +821,26 @@ void afficherStatistiques() {
 		printf("%d ", maxButs);
 		setColor(COLOR_WHITE);
 		printf("buts\n");
- 	}
+	}
 
- // Joueur le plus jeune et le plus age
- 	int ageMin = 999, ageMax = -1;
- 	int indexPlusJeune = -1, indexPlusAge = -1;
+// Joueur le plus jeune et le plus age
+	int ageMin = 999, ageMax = -1;
+	int indexPlusJeune = -1, indexPlusAge = -1;
 
- 	for (int i = 0; i < nombreJoueurs; i++) {
- 		int age = calculerAge(equipe[i].jourNaissance, equipe[i].moisNaissance, equipe[i].anneeNaissance);
- 		if (age < ageMin) {
- 			ageMin = age;
- 			indexPlusJeune = i;
- 		}
- 		if (age > ageMax) {
- 			ageMax = age;
- 			indexPlusAge = i;
- 		}
- 	}
+	for (int i = 0; i < nombreJoueurs; i++) {
+		int age = calculerAge(equipe[i].jourNaissance, equipe[i].moisNaissance, equipe[i].anneeNaissance);
+		if (age < ageMin) {
+			ageMin = age;
+			indexPlusJeune = i;
+		}
+		if (age > ageMax) {
+			ageMax = age;
+			indexPlusAge = i;
+		}
+	}
 
- 	if (indexPlusJeune != -1) {
- 		setColor(COLOR_GREEN);
+	if (indexPlusJeune != -1) {
+		setColor(COLOR_GREEN);
 		printf("Joueur le plus jeune: ");
 		setColor(COLOR_WHITE);
 		printf("%s %s (", equipe[indexPlusJeune].nom, equipe[indexPlusJeune].prenom);
@@ -811,10 +848,10 @@ void afficherStatistiques() {
 		printf("%d ", ageMin);
 		setColor(COLOR_WHITE);
 		printf("ans)\n");
- 	}
+	}
 
- 	if (indexPlusAge != -1) {
- 		setColor(COLOR_BLUE);
+	if (indexPlusAge != -1) {
+		setColor(COLOR_BLUE);
 		printf("Joueur le plus age: ");
 		setColor(COLOR_WHITE);
 		printf("%s %s (", equipe[indexPlusAge].nom, equipe[indexPlusAge].prenom);
@@ -822,8 +859,8 @@ void afficherStatistiques() {
 		printf("%d ", ageMax);
 		setColor(COLOR_WHITE);
 		printf("ans)\n");
- 	}
- }
+	}
+}
 
 // Fonction pour calculer l'age base sur la date de naissance
 int calculerAge(int jour, int mois, int annee) {
@@ -837,11 +874,11 @@ int calculerAge(int jour, int mois, int annee) {
 // Fonction pour valider une date
 int validerDate(int jour, int mois, int annee) {
 	if (annee < 1900 || annee > 2024)
-	 return 0;
+		return 0;
 	if (mois < 1 || mois > 12)
-	return 0;
+		return 0;
 	if (jour < 1)
-	return 0;
+		return 0;
 // Verifier que l'age est entre 17 et 40 ans
 	int age = calculerAge(jour, mois, annee);
 	if (age < 17 || age > 40) return 0;
@@ -857,8 +894,7 @@ int numeroMaillotExiste(int numero) {
 	}
 	return 0;
 }
-
-// Fonctions d'aide pour l'optimisation du code
+//validation du code
 int validerNom(char* nom, const char* type) {
 	if (strlen(nom) == 0) {
 		printError("Erreur: Le %s ne peut pas etre vide.\n", type);
@@ -898,19 +934,36 @@ int saisirChoixNumerique(int min, int max, const char* message) {
 
 void afficherMenuPoste() {
 	printf("Choisissez le poste de joueur:\n");
-	setColor(COLOR_GREEN); printf("  1. "); setColor(COLOR_WHITE); printf("gardien\n");
-	setColor(COLOR_GREEN); printf("  2. "); setColor(COLOR_WHITE); printf("defenseur\n");
-	setColor(COLOR_GREEN); printf("  3. "); setColor(COLOR_WHITE); printf("milieu\n");
-	setColor(COLOR_GREEN); printf("  4. "); setColor(COLOR_WHITE); printf("attaquant\n");
+	setColor(COLOR_GREEN);
+	printf("  1. ");
+	setColor(COLOR_WHITE);
+	printf("gardien\n");
+	setColor(COLOR_GREEN);
+	printf("  2. ");
+	setColor(COLOR_WHITE);
+	printf("defenseur\n");
+	setColor(COLOR_GREEN);
+	printf("  3. ");
+	setColor(COLOR_WHITE);
+	printf("milieu\n");
+	setColor(COLOR_GREEN);
+	printf("  4. ");
+	setColor(COLOR_WHITE);
+	printf("attaquant\n");
 }
 
 void afficherMenuStatut() {
 	printf("Choisissez le statut:\n");
-	setColor(COLOR_GREEN); printf("  1. "); setColor(COLOR_WHITE); printf("titulaire\n");
-	setColor(COLOR_GREEN); printf("  2. "); setColor(COLOR_WHITE); printf("remplacant\n");
+	setColor(COLOR_GREEN);
+	printf("  1. ");
+	setColor(COLOR_WHITE);
+	printf("titulaire\n");
+	setColor(COLOR_GREEN);
+	printf("  2. ");
+	setColor(COLOR_WHITE);
+	printf("remplacant\n");
 }
 
-// Fonctions d'aide avancées pour une optimisation supplémentaire
 void afficherEnTeteTableau() {
 	setColor(COLOR_YELLOW);
 	printf("ID  | Nom            | Prenom         | Maillot | Poste      | Age  | Buts  | Statut      | Inscrit le\n");
@@ -948,7 +1001,7 @@ int saisirEntierPositif(const char* message) {
 	return valeur;
 }
 
-// Fonction de tri générique
+// Fonction de tri generique
 void trierEquipe(int (*comparer)(const void*, const void*)) {
 	for (int i = 0; i < nombreJoueurs - 1; i++) {
 		int minIndex = i;
@@ -1006,7 +1059,7 @@ void afficherJoueursParPoste(const char* poste) {
 	setColor(COLOR_GRAY);
 	printf("----|----------------|----------------|---------|-----|------|--------\n");
 	setColor(COLOR_WHITE);
-	
+
 	int trouve = 0;
 	for (int i = 0; i < nombreJoueurs; i++) {
 		if (strcmp(equipe[i].poste, poste) == 0) {
